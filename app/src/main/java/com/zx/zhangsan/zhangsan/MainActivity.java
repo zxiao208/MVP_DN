@@ -9,6 +9,10 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.zx.zhangsan.zhangsan.demo.test1.LoginPresenter1;
+import com.zx.zhangsan.zhangsan.demo.test1.LoginView1;
+import com.zx.zhangsan.zhangsan.demo.test2.LoginPresenter2;
+import com.zx.zhangsan.zhangsan.demo.test2.LoginView2;
 import com.zx.zhangsan.zhangsan.framework.annotation.ContentView;
 import com.zx.zhangsan.zhangsan.framework.annotation.Event;
 import com.zx.zhangsan.zhangsan.framework.annotation.InjectUtils2;
@@ -60,24 +64,49 @@ public class MainActivity extends AppCompatActivity {
     //Xutils 3.0的写法
     @Event(value = {R.id.tv_view}, type = View.OnClickListener.class, setter = "setOnClickListener", method = "onClick")
     private void click(View v) {
-//        Toast.makeText(this,"点击了TextView", Toast.LENGTH_LONG).show();
-        login();
-    }
-
-    private void login() {
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("column","20:59:a0:10:10:fe");
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        HttpTask httpTask = new HttpTask(new HttpUtils.OnHttpResultListener() {
-        @Override
-        public void onResult(String result) {
-            Toast.makeText(MainActivity.this,"登录状态："+result,Toast.LENGTH_SHORT).show();
-        }
-    });
-    httpTask.execute("http://10.6.2.167:5051/pos-inner/pad-base/getSyjBysyjId.htm",jsonObject.toString());
+//        login(jsonObject.toString());
+        login1(jsonObject.toString());
+    }
 
-}
+
+    //MVC
+    private void login(String jsonStr) {
+
+        HttpTask httpTask = new HttpTask(new HttpUtils.OnHttpResultListener() {
+            @Override
+            public void onResult(String result) {
+                Toast.makeText(MainActivity.this,"登录状态："+result,Toast.LENGTH_SHORT).show();
+            }
+        });
+        httpTask.execute("http://10.6.2.167:5051/pos-inner/pad-base/getSyjBysyjId.htm",jsonStr);
+    }
+
+
+    //初代MVP
+    private  void login1(String jsonStr){
+         LoginPresenter1 loginPresenter1=new LoginPresenter1(new LoginView1() {
+             @Override
+             public void onLoginResult(String result) {
+                 Toast.makeText(MainActivity.this,"我是初代MVP："+result,Toast.LENGTH_SHORT).show();
+             }
+         });
+         loginPresenter1.login(jsonStr);
+    }
+
+    //二代MVP attachView,detachView M和V的解绑 当关闭Activity的时候我们需要解绑，接收到数据也不要更新UI
+    private  void login2(String jsonStr){
+        LoginPresenter2 loginPresenter2=new LoginPresenter2(new LoginView2() {
+            @Override
+            public void onLoginResult(String result) {
+                Toast.makeText(MainActivity.this,"我是初代MVP："+result,Toast.LENGTH_SHORT).show();
+            }
+        });
+        loginPresenter2.login(jsonStr);
+    }
 }
